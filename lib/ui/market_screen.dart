@@ -1,17 +1,24 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traderassistant/blocs/album_bloc/album_bloc.dart';
+import 'package:traderassistant/blocs/album_bloc/album_events.dart';
+import 'package:traderassistant/services/api_service.dart';
+import 'package:traderassistant/ui/album_page.dart';
 import 'package:traderassistant/ui/notice_screen.dart';
-import '../Favorite.dart';
-import '../PortFolios.dart';
-import '../TargetPrice.dart';
+import '../favorite.dart';
+import '../portfolios.dart';
+import '../targetPrice.dart';
 import '../main.dart';
 
 ////Market
 class MarketScreen extends StatefulWidget {
   static const id = 'market_screen';
 
-  @override
-  _MarketScreenState createState() => _MarketScreenState();
+  // @override
+   _MarketScreenState createState() => _MarketScreenState();
+
+
 }
 
 class _MarketScreenState extends State<MarketScreen> {
@@ -20,6 +27,35 @@ class _MarketScreenState extends State<MarketScreen> {
 final List<String> companyNames = ['Cocacola', 'Pepsi', 'Fanta'];
 final List<int> companyPrices = [555, 333, 222];
 
+// @override
+// void initState() {
+//   loadAlbums();
+//   // TODO: implement initState
+//   super.initState();
+// }
+
+// loadAlbums() async
+// {
+//   print('check: loading albums');
+//   context.read<AlbumsBloc>().add(AlbumGetEvent());
+//   // context.read<AlbumsBloc>().add(AlbumEvents.fetchAlbums);
+//   print('check: loaded albums');
+// }
+
+
+  loadAlbums() async
+  {
+    print('check: loading albums');
+    context.read<StocksBloc>().add(AlbumGetEvent());
+    // context.read<AlbumsBloc>().add(AlbumEvents.fetchAlbums);
+    print('check: loaded albums');
+  }
+@override
+  void initState() {
+    // TODO: implement initState
+loadAlbums();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -65,7 +101,24 @@ final List<int> companyPrices = [555, 333, 222];
             ],
           ),
         ),
-        body: TabBarView(
+        body:BlocBuilder(builder: (BuildContext context, AlbumState state){
+
+          if (state is AlbumListErrorstate) {
+            print('check: error here');
+            final error = state.error;
+            String message = '${error.toString()}\nTap to Retry.';
+            return Text(
+              message,
+            );
+          }
+          if (state is AlbumLoadedState) {
+            print('check: state is correct');
+            List<Stocks> stocks = state.stocks;
+            print('album list is $stocks');
+            return _list(stocks);
+
+          }
+          return  TabBarView(
           //These are the 9 tab bar views..........
           children: <Widget>[
 
@@ -4395,7 +4448,7 @@ final List<int> companyPrices = [555, 333, 222];
               ],
             ),
           ],
-        ),
+        );}),
         drawer: Drawer(
           child: ListView(
             padding: EdgeInsets.zero,
@@ -4404,7 +4457,7 @@ final List<int> companyPrices = [555, 333, 222];
                 margin: EdgeInsets.all(0),
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('images/stock2.jpeg'),
+                    image: AssetImage('assets/images/stock2.jpeg'),
                     fit: BoxFit.fitWidth,
                   ),
                   color: Color(0xff404040),
@@ -4684,8 +4737,8 @@ final List<int> companyPrices = [555, 333, 222];
 
 class CompanyTile extends StatelessWidget {
    CompanyTile({this.companyName, this.companyPrice});
-final String companyName;
-final int companyPrice;
+final String? companyName;
+final int? companyPrice;
 
   @override
   Widget build(BuildContext context) {
@@ -4697,7 +4750,7 @@ final int companyPrice;
           Row(
             children: [
               Text(
-                companyName,
+                companyName!,
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -4705,7 +4758,7 @@ final int companyPrice;
               ),
               SizedBox(width: 200),
               Text(
-                companyPrice.toString(),
+                companyPrice!.toString(),
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
